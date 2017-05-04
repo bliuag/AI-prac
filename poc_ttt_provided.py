@@ -21,33 +21,45 @@ class TTTBoard:
     Class to represent a Tic-Tac-Toe board.
     """
 
-    def __init__(self, dim, reverse=False, board=None):
+    def __init__(self, dim, reverse=False, board = None, lastmove = None):
         self._dim = dim
         self._reverse = reverse
         if board == None:
             # Create empty board
-            self._board = [[EMPTY for dummycol in range(dim)]
+            self._board = [[[[EMPTY for dummycol in range(dim)]
                            for dummyrow in range(dim)]
+                           for dummyCOL in range(dim)]
+                           for dummyROW in range(dim)]
         else:
             # Copy board grid
-            self._board = [[board[row][col] for col in range(dim)]
+            self._board = [[[[board[boxr][boxc][row][col] for col in range(dim)]
                            for row in range(dim)]
+                           for boxc in range(dim)]
+                           for boxr in range(dim)]
+        self._lastmove = lastmove
 
     def __str__(self):
         """
         Human readable representation of the board.
         """
         rep = ""
-        for row in range(self._dim):
-            for col in range(self._dim):
-                rep += STRMAP[self._board[row][col]]
-                if col == self._dim - 1:
-                    rep += "\n"
+        for boxrow in range(self._dim):
+            for row in range(self._dim):
+                for boxcol in range(self._dim):
+                    for col in range(self._dim):
+                        rep += STRAMP[self._board[boxrow][boxcol][row][col]]
+                        if col == self._dim - 1 and boxcol == self._dim - 1:
+                            rep += "\n"
+                        elif col == self._dim - 1:
+                            rep += " || "
+                        else:
+                            rep += " | "
+                if row != self._dim - 1:
+                    rep += "-" * (4 * self._dim * self._dim - 3)
+                elif boxrow != self._dim - 1:
+                    rep += "=" * (4 * self._dim * self._dim - 3)
                 else:
-                    rep += " | "
-            if row != self._dim - 1:
-                rep += "-" * (4 * self._dim - 3)
-                rep += "\n"
+                    rep += "\n"
         return rep
 
     def get_dim(self):
@@ -56,52 +68,117 @@ class TTTBoard:
         """
         return self._dim
 
-    def square(self, row, col):
+    def square(self, boxrow, boxcol, row, col):
         """
         Return the status (EMPTY, PLAYERX, PLAYERO) of the square at
         position (row, col).
         """
-        return self._board[row][col]
+        return self._board[boxrow][boxcol][row][col]
 
-    def get_empty_squares(self):
+    def get_all_empty_squares(self):
         """
         Return a list of (row, col) tuples for all empty squares
         """
         empty = []
-        for row in range(self._dim):
-            for col in range(self._dim):
-                if self._board[row][col] == EMPTY:
-                    empty.append((row, col))
+        for boxrow in range(self._dim):
+            for boxcol in range(self._dim):
+                for row in range(self._dim):
+                    for col in range(self._dim):
+                        if self._board[boxrow][boxcol][row][col] == EMPTY:
+                            empty.append((boxrow, boxcol, row, col))
         return empty
 
-    def move(self, row, col, player):
+    def check_full(self, boxrow, boxcol):
+        """
+        check whether a box is full
+        """
+        for row in range(self._dim):
+            for col in range(self._dim):
+                if self._board[boxrow][boxcol][row][col] != EMPTY:
+                    return False
+        return True
+
+    def get_valid_moves(self):
+        """
+        Return a list of (boxrow, boxcol, row, col) tuples for all empty squares
+        """
+        lastmove = self._lastmove
+        if lastmove == None:
+            return self.get_all_empty_squares()
+        lastboxrow, lastboxcol, lastrow, lastcol = lastmove
+        if self.check_full(lastrow,lastcol):
+            return self.get_all_empty_squares()
+        else
+            boxrow = lastrow
+            boxcol = lastcol
+            validset = []
+            for row in range(self._dim):
+                for col in range(self._dim):
+                    if self._board[boxrow][boxcol][row][col] == EMPTY:
+                        validset.append((boxrow, boxcol, row, col))
+            return validset
+        
+
+    def move(self, boxrow, boxcol, row, col, player):
         """
         Place player on the board at position (row, col).
 
         Does nothing if board square is not empty.
         """
-        if self._board[row][col] == EMPTY:
-            self._board[row][col] = player
+        if self._board[boxrow][boxcol][row][col] == EMPTY:
+            self._board[boxrow][boxcol][row][col] = player
+            self._lastmove = (boxrow, boxcol, row, col)
 
+    def check_win_box(self, boxrow, boxcol):
+
+        box = self._board[boxrow][boxcol]
+        
+        lines = []
+
+        # rows
+        lines.extend(box)
+
+        # cols
+        cols = [[box[rowidx][colidx] for rowidx in range(self._dim)]
+                for colidx in range(self._dim)]
+        lines.extend(cols)
+
+        # diags
+        diag1 = [box[idx][idx] for idx in range(self._dim)]
+        diag2 = [box[idx][self._dim - idx - 1]
+                 for idx in range(self._dim)]
+        lines.append(diag1)
+        lines.append(diag2)
+
+        # check all lines
+        for line in lines:
+            if len(set(line)) == 1 and line[0] != EMPTY:
+                return line[0]
+
+        return EMPTY
+    
     def check_win(self):
         """
         If someone has won, return player.
         If game is a draw, return DRAW.
         If game is in progress, return None.
         """
+        board = [[self.check_win_box(boxrow,boxcol) for boxcol in range(self._dim)]
+                  for boxrow in range(self._dim)]
+        
         lines = []
 
         # rows
-        lines.extend(self._board)
+        lines.extend(board)
 
         # cols
-        cols = [[self._board[rowidx][colidx] for rowidx in range(self._dim)]
+        cols = [[board[rowidx][colidx] for rowidx in range(self._dim)]
                 for colidx in range(self._dim)]
         lines.extend(cols)
 
         # diags
-        diag1 = [self._board[idx][idx] for idx in range(self._dim)]
-        diag2 = [self._board[idx][self._dim - idx - 1]
+        diag1 = [board[idx][idx] for idx in range(self._dim)]
+        diag2 = [board[idx][self._dim - idx - 1]
                  for idx in range(self._dim)]
         lines.append(diag1)
         lines.append(diag2)
@@ -115,7 +192,7 @@ class TTTBoard:
                     return line[0]
 
         # no winner, check for draw
-        if len(self.get_empty_squares()) == 0:
+        if len(self.get_all_empty_squares()) == 0:
             return DRAW
 
         # game is still in progress
@@ -125,7 +202,7 @@ class TTTBoard:
         """
         Return a copy of the board.
         """
-        return TTTBoard(self._dim, self._reverse, self._board)
+        return TTTBoard(self._dim, self._reverse, self._board, self._lastmove)
 
 
 def switch_player(player):
@@ -152,8 +229,8 @@ def play_game(mc_move_function, ntrials, reverse=False):
     # Run game
     while winner == None:
         # Move
-        row, col = mc_move_function(board, curplayer, ntrials)
-        board.move(row, col, curplayer)
+        boxrow, boxcol, row, col = mc_move_function(board, curplayer, ntrials)
+        board.move(boxrow, boxcol, row, col, curplayer)
 
         # Update state
         winner = board.check_win()

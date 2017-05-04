@@ -23,7 +23,7 @@ class TicTacGUI:
     def __init__(self, size, aiplayer, aifunction, ntrials, reverse=False):
         # Game board
         self._size = size
-        self._bar_spacing = GUI_WIDTH // self._size
+        self._bar_spacing = GUI_WIDTH // (self._size * self._size)
         self._turn = provided.PLAYERX
         self._reverse = reverse
 
@@ -107,14 +107,16 @@ class TicTacGUI:
                              'Black')
 
         # Draw the current players' moves
-        for row in range(self._size):
-            for col in range(self._size):
-                symbol = self._board.square(row, col)
-                coords = self.get_coords_from_grid(row, col)
-                if symbol == provided.PLAYERX:
-                    self.drawx(canvas, coords)
-                elif symbol == provided.PLAYERO:
-                    self.drawo(canvas, coords)
+        for boxrow in range(self._size):
+            for boxcol in range(self._size):
+                for row in range(self._size):
+                    for col in range(self._size):
+                        symbol = self._board.square(boxrow, boxcol, row, col)
+                        coords = self.get_coords_from_grid(boxrow, boxcol, row, col)
+                        if symbol == provided.PLAYERX:
+                            self.drawx(canvas, coords)
+                        elif symbol == provided.PLAYERO:
+                        self.drawo(canvas, coords)
 
         # Run AI, if necessary
         if not self._wait:
@@ -127,9 +129,9 @@ class TicTacGUI:
         Make human move.
         """
         if self._inprogress and (self._turn == self._humanplayer):
-            row, col = self.get_grid_from_coords(position)
-            if self._board.square(row, col) == provided.EMPTY:
-                self._board.move(row, col, self._humanplayer)
+            boxrow, boxcol, row, col = self.get_grid_from_coords(position)
+            if self._board.square(boxrow, boxcol, row, col) == provided.EMPTY:
+                self._board.move(boxrow, boxcol, row, col, self._humanplayer)
                 self._turn = self._aiplayer
                 winner = self._board.check_win()
                 if winner is not None:
@@ -141,11 +143,11 @@ class TicTacGUI:
         Make AI move.
         """
         if self._inprogress and (self._turn == self._aiplayer):
-            row, col = self._aifunction(self._board,
+            boxrow, boxcol, row, col = self._aifunction(self._board,
                                         self._aiplayer,
                                         self._ntrials)
-            if self._board.square(row, col) == provided.EMPTY:
-                self._board.move(row, col, self._aiplayer)
+            if self._board.square(boxrow, boxcol, row, col) == provided.EMPTY:
+                self._board.move(boxrow, boxcol, row, col, self._aiplayer)
             self._turn = self._humanplayer
             winner = self._board.check_win()
             if winner is not None:
@@ -166,13 +168,15 @@ class TicTacGUI:
             # Game is no longer in progress
         self._inprogress = False
 
-    def get_coords_from_grid(self, row, col):
+    def get_coords_from_grid(self, boxrow, boxcol, row, col):
         """
         Given a grid position in the form (row, col), returns
         the coordinates on the canvas of the center of the grid.
         """
         # X coordinate = (bar spacing) * (col + 1/2)
         # Y coordinate = height - (bar spacing) * (row + 1/2)
+        col = boxcol * self._size + col
+        row = boxrow * self._size + row
         return (self._bar_spacing * (col + 1.0 / 2.0),  # x
                 self._bar_spacing * (row + 1.0 / 2.0))  # y
 
@@ -182,8 +186,16 @@ class TicTacGUI:
         the grid.
         """
         posx, posy = position
-        return (posy // self._bar_spacing,  # row
-                posx // self._bar_spacing)  # col
+        r = posy // self._bar_spacing
+        c = posx // self._bar_spacing
+        boxrow = r // self._size
+        boxcol = c // self._size
+        row = r % self._size
+        col = c % self._size
+        return (boxrow,
+                boxcol,
+                row,
+                col)
 
 
 def run_gui(board_size, ai_player, ai_function, ntrials, reverse=False):
