@@ -57,8 +57,7 @@ class TTTBoard:
                     rep += "-" * (4 * self._dim * self._dim - 3)
                 elif boxrow != self._dim - 1:
                     rep += "=" * (4 * self._dim * self._dim - 3)
-                else:
-                    rep += "\n"
+                rep += "\n"
         return rep
 
     def get_dim(self):

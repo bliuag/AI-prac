@@ -9,7 +9,7 @@ import poc_ttt_provided as provided
 
 # Constants for Monte Carlo simulator
 # Change as desired
-NTRIALS = 20  # Number of trials to run
+NTRIALS = 1  # Number of trials to run
 SCORE_CURRENT = 3.0  # Score for squares played by the machine player
 SCORE_OTHER = 2.0  # Score for squares played by the other player
 
@@ -67,7 +67,7 @@ def mc_trial(board, player):
     while board.check_win() == None:
         # print ("moves done in a trial: ", cnt)
         # ## shall only consider the board.get_valid_moves()
-        print ("# of valid moves: ", len(board.get_valid_moves())) ### changed to get_all_empty_
+        # print ("# of valid moves: ", len(board.get_valid_moves())) ### changed to get_all_empty_
         add_pos = random.choice( board.get_valid_moves()) # return list of tuple (boxrow, boxcol, row, col)
 
         # 4 positions defines a move
@@ -135,7 +135,7 @@ def mc_move(board, player, trials):
     score_instance = Scores(board)
     scores = score_instance.get_score() # scores is list in list..
     for i in range(trials):
-        print ("################################attention trial  %d ##############################" %(i))
+        # print ("################################attention trial  %d ##############################" %(i))
         copy=board.clone()
         mc_trial(copy, player) # take the copy and simulate to game end. copy is modified
         mc_update_scores(scores, copy, player)
