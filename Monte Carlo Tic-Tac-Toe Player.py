@@ -65,9 +65,11 @@ def mc_trial(board, player):
     """
     cnt = 0
     while board.check_win() == None:
-        print ("have made # of moves in a trial: ", cnt)
-        print ("# of valid moves: ", len(board.get_valid_moves()))
+        # print ("moves done in a trial: ", cnt)
+        # ## shall only consider the board.get_valid_moves()
+        # print ("# of valid moves: ", len(board.get_valid_moves())) ### changed to get_all_empty_
         add_pos = random.choice( board.get_valid_moves()) # return list of tuple (boxrow, boxcol, row, col)
+
         # 4 positions defines a move
         board.move(add_pos[0],add_pos[1], add_pos[2], add_pos[3], player)   # move(self, boxrow, boxcol, row, col, player):
         player = provided.switch_player(player)
@@ -80,9 +82,7 @@ def mc_update_scores(scores, board, player):
     update the scores grid according to the board.
     the scores is a reference 
     """
-
     dim = range(board.get_dim())
-
     if board.check_win() == provided.PLAYERX:
         # scores.update_score(board, provided.PLAYERX) # to be continued oop design
         for db_i in dim:
@@ -116,7 +116,7 @@ def get_best_move(board, scores):
     and randomly return one of them as a (boxrow, boxcol, row, column) tuple
     """
     # while board.check_win() == None:
-    empty_list = board.get_all_empty_squares()  # ist of length 4 tuple
+    empty_list = board.get_valid_moves()  # ist of length 4 tuple
     empty_val = [scores[i[0]][i[1]][i[2]][i[3]] for i in empty_list] # non-valid moves are 0
     max_score = max(empty_val)
 
@@ -134,7 +134,8 @@ def mc_move(board, player, trials):
     """
     score_instance = Scores(board)
     scores = score_instance.get_score() # scores is list in list..
-    for _ in range(trials):
+    for i in range(trials):
+        # print ("################################attention trial  %d ##############################" %(i))
         copy=board.clone()
         mc_trial(copy, player) # take the copy and simulate to game end. copy is modified
         mc_update_scores(scores, copy, player)
@@ -143,5 +144,5 @@ def mc_move(board, player, trials):
 
 
 # Test game with the console or the GUI.
-# provided.play_game(mc_move, NTRIALS, False) # two monte carol players test
-poc_ttt_gui.run_gui(3, provided.PLAYERX, mc_move, NTRIALS, False)
+provided.play_game(mc_move, NTRIALS, False) # two monte carol players test
+# poc_ttt_gui.run_gui(3, provided.PLAYERX, mc_move, NTRIALS, False)
