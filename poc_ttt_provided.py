@@ -93,7 +93,7 @@ class TTTBoard:
         """
         for row in range(self._dim):
             for col in range(self._dim):
-                if self._board[boxrow][boxcol][row][col] != EMPTY:
+                if self._board[boxrow][boxcol][row][col] == EMPTY:
                     return False
         return True
 
