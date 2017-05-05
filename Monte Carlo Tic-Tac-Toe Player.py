@@ -9,7 +9,7 @@ import poc_ttt_provided as provided
 
 # Constants for Monte Carlo simulator
 # Change as desired
-NTRIALS = 1  # Number of trials to run
+NTRIALS = 100  # Number of trials to run
 SCORE_CURRENT = 3.0  # Score for squares played by the machine player
 SCORE_OTHER = 2.0  # Score for squares played by the other player
 

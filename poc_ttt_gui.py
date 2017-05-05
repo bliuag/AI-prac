@@ -162,7 +162,7 @@ class TicTacGUI:
         """
         if self._inprogress and (self._turn == self._humanplayer):
             boxrow, boxcol, row, col = self.get_grid_from_coords(position)
-            if self._board.square(boxrow, boxcol, row, col) == provided.EMPTY:
+            if self._board.square(boxrow, boxcol, row, col) == provided.EMPTY and (boxrow, boxcol, row, col) in self._board.get_valid_moves():
                 self._board.move(boxrow, boxcol, row, col, self._humanplayer)
                 self._turn = self._aiplayer
                 winner = self._board.check_win()
