@@ -144,5 +144,5 @@ def mc_move(board, player, trials):
 
 
 # Test game with the console or the GUI.
-provided.play_game(mc_move, NTRIALS, False) # two monte carol players test
-# poc_ttt_gui.run_gui(3, provided.PLAYERX, mc_move, NTRIALS, False)
+# provided.play_game(mc_move, NTRIALS, False) # two monte carol players test
+poc_ttt_gui.run_gui(3, provided.PLAYERX, mc_move, NTRIALS, False)

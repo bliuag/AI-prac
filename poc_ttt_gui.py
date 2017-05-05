@@ -93,18 +93,50 @@ class TicTacGUI:
         """
         Updates the tic-tac-toe GUI.
         """
-        # Draw the '#' symbol
+        # Draw the thin line
         for bar_start in range(self._bar_spacing,
                                GUI_WIDTH - 1,
                                self._bar_spacing):
+            
+            numbar = bar_start // self._bar_spacing
+            if numbar == self._size * self._size:
+                continue
+            if numbar % (self._size) == 0:
+                continue
+            # barw = ((numbar % (self._size) == 0 ) + 1) * BAR_WIDTH
+            barw = BAR_WIDTH * 0.5
+            color = "Brown"
+            # if numbar % (self._size) == 0 :
+            #     color = "Black"
             canvas.draw_line((bar_start, 0),
                              (bar_start, GUI_HEIGHT),
-                             BAR_WIDTH,
-                             'Black')
+                             barw,
+                             color)
             canvas.draw_line((0, bar_start),
                              (GUI_WIDTH, bar_start),
-                             BAR_WIDTH,
-                             'Black')
+                             barw,
+                             color)
+        
+        # draw the heavy line
+        for bar_start in range(self._bar_spacing,
+                               GUI_WIDTH - 1,
+                               self._bar_spacing):
+            
+            numbar = bar_start // self._bar_spacing
+            if numbar == self._size * self._size:
+                continue
+            if numbar % (self._size) != 0:
+                continue
+            barw = BAR_WIDTH
+            color = "Black"
+            canvas.draw_line((bar_start, 0),
+                             (bar_start, GUI_HEIGHT),
+                             barw,
+                             color)
+            canvas.draw_line((0, bar_start),
+                             (GUI_WIDTH, bar_start),
+                             barw,
+                             color)
 
         # Draw the current players' moves
         for boxrow in range(self._size):
