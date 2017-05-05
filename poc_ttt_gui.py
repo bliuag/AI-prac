@@ -116,7 +116,7 @@ class TicTacGUI:
                         if symbol == provided.PLAYERX:
                             self.drawx(canvas, coords)
                         elif symbol == provided.PLAYERO:
-                        self.drawo(canvas, coords)
+                            self.drawo(canvas, coords)
 
         # Run AI, if necessary
         if not self._wait:

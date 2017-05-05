@@ -20,9 +20,8 @@ class TTTBoard:
     """
     Class to represent a Tic-Tac-Toe board.
     """
-
     def __init__(self, dim, reverse=False, board = None, lastmove = None):
-        self._dim = dim
+        self._dim = dim # now dim is 3. but represent 9x9 board
         self._reverse = reverse
         if board == None:
             # Create empty board
@@ -47,7 +46,7 @@ class TTTBoard:
             for row in range(self._dim):
                 for boxcol in range(self._dim):
                     for col in range(self._dim):
-                        rep += STRAMP[self._board[boxrow][boxcol][row][col]]
+                        rep += STRMAP[self._board[boxrow][boxcol][row][col]]
                         if col == self._dim - 1 and boxcol == self._dim - 1:
                             rep += "\n"
                         elif col == self._dim - 1:
@@ -77,7 +76,7 @@ class TTTBoard:
 
     def get_all_empty_squares(self):
         """
-        Return a list of (row, col) tuples for all empty squares
+        Return a list of (boxrow, boxcol, row, col) tuples for all empty squares
         """
         empty = []
         for boxrow in range(self._dim):
@@ -108,7 +107,7 @@ class TTTBoard:
         lastboxrow, lastboxcol, lastrow, lastcol = lastmove
         if self.check_full(lastrow,lastcol):
             return self.get_all_empty_squares()
-        else
+        else:
             boxrow = lastrow
             boxcol = lastcol
             validset = []
@@ -132,7 +131,6 @@ class TTTBoard:
     def check_win_box(self, boxrow, boxcol):
 
         box = self._board[boxrow][boxcol]
-        
         lines = []
 
         # rows
@@ -165,7 +163,6 @@ class TTTBoard:
         """
         board = [[self.check_win_box(boxrow,boxcol) for boxcol in range(self._dim)]
                   for boxrow in range(self._dim)]
-        
         lines = []
 
         # rows
@@ -208,7 +205,6 @@ class TTTBoard:
 def switch_player(player):
     """
     Convenience function to switch players.
-
     Returns other player.
     """
     if player == PLAYERX:

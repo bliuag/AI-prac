@@ -14,24 +14,41 @@ SCORE_CURRENT = 3.0  # Score for squares played by the machine player
 SCORE_OTHER = 2.0  # Score for squares played by the other player
 
 
-# Add your functions here.
 class Scores:
     """
-    # use this class to keep track of scores
+    # use this class to keep track of MC scores
     """
     def __init__(self, board):
-        self._score = [[0 for dummy_row in range(board.get_dim())] for dummy_col in range(board.get_dim())]
+        self._score = [[[[0 for dummycol in range(board.get_dim())]
+                         for dummyrow in range(board.get_dim())]
+                        for dummyCOL in range(board.get_dim())]
+                       for dummyROW in range(board.get_dim())]
+        # score and board need to be consistant
 
     def __str__(self):
         return self._score
 
-    def set_score(self, board):
-        """
-        # set scores
-        """
-        for dummy_row in range(board.get_dim()):
-            for dummy_col in range(board.get_dim()):
-                self._score[dummy_row][dummy_col] = board.square(dummy_row, dummy_col)
+    def update_score(self, board, player):
+        # update the score according to the board and player
+        for db_i in range(board.get_dim()):
+            for db_j in range(board.get_dim()):
+                for d_i in range(board.get_dim()):
+                    for d_j in range(board.get_dim()):
+                        if player == provided.PLAYERX:
+                            if board.square(db_i, db_j, d_i, d_j) == provided.PLAYERX:
+                                self._score[db_i][db_j][d_i][d_j] += SCORE_CURRENT
+                            elif board.square(db_i, db_j, d_i, d_j) == provided.EMPTY:
+                                self._score[db_i][db_j][d_i][d_j] += 0
+                            else:
+                                self._score[db_i][db_j][d_i][d_j] -= SCORE_OTHER
+                        elif player == provided.PLAYERO:
+                            if board.square(db_i, db_j, d_i, d_j) == provided.PLAYERO:
+                                self._score[db_i][db_j][d_i][d_j] += SCORE_OTHER
+                            elif board.square(db_i, db_j, d_i, d_j) == provided.EMPTY:
+                                self._score[db_i][db_j][d_i][d_j] += 0
+                            else:
+                                self._score[db_i][db_j][d_i][d_j] -= SCORE_CURRENT
+        return self._score
 
     def get_score(self):
         """
@@ -42,89 +59,89 @@ class Scores:
 
 def mc_trial(board, player):
     """
-    # This function takes a current board 
-    # and the next player to move
+    This function takes a current board and the next player to move
+    then move turn by turn till someone wins or draw
+    modify the board
     """
-    while board.check_win()==None:
-        add_pos= random.choice( board.get_empty_squares() )
-        #print "mc_trial part: add pos: ", add_pos
-        board.move(add_pos[0],add_pos[1], player)
-        player=provided.switch_player(player)
-    #print "mc_trial part: ", "\n",board
+    cnt = 0
+    while board.check_win() == None:
+        print ("have made # of moves in a trial: ", cnt)
+        print ("# of valid moves: ", len(board.get_valid_moves()))
+        add_pos = random.choice( board.get_valid_moves()) # return list of tuple (boxrow, boxcol, row, col)
+        # 4 positions defines a move
+        board.move(add_pos[0],add_pos[1], add_pos[2], add_pos[3], player)   # move(self, boxrow, boxcol, row, col, player):
+        player = provided.switch_player(player)
+        cnt += 1
     return None
 
 
 def mc_update_scores(scores, board, player):
     """
-    # The function should score the completed board 
-    # and update the scores grid.
-    # As the function updates the scores grid directly
+    update the scores grid according to the board.
+    the scores is a reference 
     """
+
     dim = range(board.get_dim())
-    #    scores=[  [0 for dummy in dim] for dummy in dim ]
+
     if board.check_win() == provided.PLAYERX:
-        for d_i in dim:
-            for d_j in dim:
-                if board.square(d_i, d_j) == provided.PLAYERX:
-                    scores[d_i][d_j] += SCORE_CURRENT
-                elif board.square(d_i, d_j) == provided.EMPTY:
-                    scores[d_i][d_j] += 0
-                else:
-                    scores[d_i][d_j] -= SCORE_OTHER
+        # scores.update_score(board, provided.PLAYERX) # to be continued oop design
+        for db_i in dim:
+            for db_j in dim:
+                for d_i in dim:
+                    for d_j in dim:
+                        if board.square(db_i, db_j, d_i, d_j) == provided.PLAYERX:
+                            scores[db_i][db_j][d_i][d_j] += SCORE_CURRENT
+                        elif board.square(db_i, db_j, d_i, d_j) == provided.EMPTY:
+                            scores[db_i][db_j][d_i][d_j] += 0
+                        else:
+                            scores[db_i][db_j][d_i][d_j] -= SCORE_OTHER
     elif board.check_win() == provided.PLAYERO:
-        for d_i in dim:
-            for d_j in dim:
-                if board.square(d_i, d_j) == provided.PLAYERO:
-                    scores[d_i][d_j] += SCORE_OTHER
-                elif board.square(d_i, d_j) == provided.EMPTY:
-                    scores[d_i][d_j] += 0
-                else:
-                    scores[d_i][d_j] -= SCORE_CURRENT
-    # print "update score part: scores: ", scores
+        # scores.update_score(board, provided.PLAYERO)
+        for db_i in dim:
+            for db_j in dim:
+                for d_i in dim:
+                    for d_j in dim:
+                        if board.square(db_i, db_j, d_i, d_j) == provided.PLAYERO:
+                            scores[db_i][db_j][d_i][d_j] += SCORE_OTHER
+                        elif board.square(db_i, db_j, d_i, d_j) == provided.EMPTY:
+                            scores[db_i][db_j][d_i][d_j] += 0
+                        else:
+                            scores[db_i][db_j][d_i][d_j] -= SCORE_CURRENT
     return None
+
 
 def get_best_move(board, scores):
     """
-    # The function find all of the empty squares with the maximum score 
-    # and randomly return one of them as a (row, column) tuple
+    The function find all of the valid empty squares with the maximum score 
+    and randomly return one of them as a (boxrow, boxcol, row, column) tuple
     """
-    while board.check_win() == None:
-        e_i = board.get_empty_squares()  # ei is a list of tuple
-        # print "ei is: ", ei
-        # i is a tuple
-        empty_val = [scores[i[0]][i[1]] for i in e_i]
-        empty_max = max(empty_val)
+    # while board.check_win() == None:
+    empty_list = board.get_all_empty_squares()  # ist of length 4 tuple
+    empty_val = [scores[i[0]][i[1]][i[2]][i[3]] for i in empty_list] # non-valid moves are 0
+    max_score = max(empty_val)
 
-        choice_range = []
-        # print "get_best_move part: empty ones are: ",board.get_empty_squares()
-        for d_i in board.get_empty_squares():
-            # mistake: if board.square(i[0],i[1])== tot_max:
-            if scores[d_i[0]][d_i[1]] == empty_max:
-                choice_range.append(d_i)
-                #                print "in loop choice_range is: ", choice_range
-        # print "get_best_move part: choice_range is:", choice_range
-        final_choice = random.choice(choice_range)
-        return final_choice
+    choice_range = []
+    for i in empty_list:
+        if scores[i[0]][i[1]][i[2]][i[3]] == max_score:
+            choice_range.append(i)
+    final_choice = random.choice(choice_range)
+    return final_choice
 
-
+# similar to main function
 def mc_move(board, player, trials):
     """
-    # The function should use the Monte Carlo simulation 
-    #  return a move for the machine player in the form of a (row, column) tuple
+    return the best Monte Carlo simulation move for the machine player.(boxrow, boxcol, row, column) tuple
     """
-    scores=[  [0 for dummy in range(board.get_dim())] for dummy in range(board.get_dim()) ]
+    score_instance = Scores(board)
+    scores = score_instance.get_score() # scores is list in list..
     for _ in range(trials):
         copy=board.clone()
-        mc_trial(copy, player)#this is for modifying the copy
+        mc_trial(copy, player) # take the copy and simulate to game end. copy is modified
         mc_update_scores(scores, copy, player)
-    #print "mc_move part: scores: ", scores
-    return get_best_move(board, scores)
+    best_move = get_best_move(board, scores)
+    return best_move
 
 
 # Test game with the console or the GUI.
-# Uncomment whichever you prefer.
-# Both should be commented out when you submit for
-# testing to save time.
-
-provided.play_game(mc_move, NTRIALS, False)
-poc_ttt_gui.run_gui(9, provided.PLAYERX, mc_move, NTRIALS, False)
+# provided.play_game(mc_move, NTRIALS, False) # two monte carol players test
+poc_ttt_gui.run_gui(3, provided.PLAYERX, mc_move, NTRIALS, False)
