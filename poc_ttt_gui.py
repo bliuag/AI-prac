@@ -1,7 +1,7 @@
 """
 poc_ttt_gui.pu
 Tic Tac Toe GUI code.
-@Author  Rice  University
+@Author  Rice  University. Revised by Jiahan Yan and Boyu Liu
 """
 
 try:
@@ -31,7 +31,7 @@ class TicTacGUI:
         self._humanplayer = provided.switch_player(aiplayer)
         self._aiplayer = aiplayer
         self._aifunction = aifunction
-        self._ntrials = ntrials
+        self._parameter = ntrials
 
         # Set up data structures
         self.setup_frame()
@@ -39,11 +39,15 @@ class TicTacGUI:
         # Start new game
         self.newgame()
 
+        # set valid region highlight
+        self.boxrow_valid = None
+        self.boxcol_valid = None
+
     def setup_frame(self):
         """
         Create GUI frame and add handlers.
         """
-        self._frame = simplegui.create_frame("Tic-Tac-Toe",
+        self._frame = simplegui.create_frame("Ultimate Tic-Tac-Toe",
                                              GUI_WIDTH,
                                              GUI_HEIGHT)
         self._frame.set_canvas_background('White')
@@ -88,6 +92,10 @@ class TicTacGUI:
         """
         halfsize = .4 * self._bar_spacing
         canvas.draw_circle(pos, halfsize, BAR_WIDTH, 'Black')
+
+    # to be done
+    def drawValidRegion(self, boxrow, boxcol):
+        pass
 
     def draw(self, canvas):
         """
@@ -176,14 +184,18 @@ class TicTacGUI:
         """
         if self._inprogress and (self._turn == self._aiplayer):
             boxrow, boxcol, row, col = self._aifunction(self._board,
-                                        self._aiplayer,
-                                        self._ntrials)
+                                                        self._aiplayer,
+                                                        self._parameter) # function parameter
             if self._board.square(boxrow, boxcol, row, col) == provided.EMPTY:
                 self._board.move(boxrow, boxcol, row, col, self._aiplayer)
             self._turn = self._humanplayer
             winner = self._board.check_win()
             if winner is not None:
                 self.game_over(winner)
+            ### add here to highlight the effective region using self.boxrow_valid and  self.boxcol_valid
+            self.boxrow_valid, self.boxcol_valid = boxrow, boxcol
+            ### highlight the valid region
+            self.drawValidRegion(boxrow, boxcol)
 
     def game_over(self, winner):
         """

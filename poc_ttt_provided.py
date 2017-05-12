@@ -1,7 +1,7 @@
 """
 poc_ttt_provided.py
 Provided Code for Tic-Tac-Toe
-@author Rice university
+@author Rice university, revised by Jiahan Yan and Boyu Liu
 """
 
 # Constants
@@ -212,7 +212,7 @@ def switch_player(player):
         return PLAYERX
 
 
-def play_game(mc_move_function, ntrials, reverse=False):
+def play_game(ai_func1,ai1_para, ai_func2, ai2_para, reverse=False):
     """
     Function to play a game with two MC players.
     """
@@ -224,7 +224,10 @@ def play_game(mc_move_function, ntrials, reverse=False):
     # Run game
     while winner == None:
         # Move
-        boxrow, boxcol, row, col = mc_move_function(board, curplayer, ntrials)
+        if curplayer == PLAYERX:
+            boxrow, boxcol, row, col = ai_func1(board, curplayer, ai1_para)
+        else:
+            boxrow, boxcol, row, col = ai_func2(board, curplayer, ai2_para)
         board.move(boxrow, boxcol, row, col, curplayer)
 
         # Update state
@@ -232,8 +235,8 @@ def play_game(mc_move_function, ntrials, reverse=False):
         curplayer = switch_player(curplayer)
 
         # Display board
-        print (board)
-        print ("\n")
+        # print (board)
+        # print ("\n")
 
     # Print winner
     if winner == PLAYERX:
@@ -244,3 +247,4 @@ def play_game(mc_move_function, ntrials, reverse=False):
         print ("Tie!")
     else:
         print ("Error: unknown winner")
+    return winner
