@@ -170,7 +170,7 @@ def minMaxRec(d, board, player):
 def minMaxMove(board, player, d):
     return minMaxRec(d, board, player)[0]
 
-############### huristic function (feature function)
+############### huristic function (feature function) ##########
 def huristic(board, player):
     last_move = board._lastmove
 
