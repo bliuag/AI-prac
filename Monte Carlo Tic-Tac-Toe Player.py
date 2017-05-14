@@ -137,26 +137,36 @@ def mc_move(board, player, trials):
     return best_move
 
 ############################### minMax recursion #######################
-DEPTH = 2
-MIN_MAX_HUR = 10 # huristic rounds
+DEPTH = 6
+MIN_MAX_MC_ROUND = 10 # huristic rounds
 def minMaxRec(d, board, player):
     """
     min-max to certain degree
     """
+    if board.check_win() != None:
+        return None, float("inf")
     if d == 0:
         oppo = provided.switch_player(player)
-        winr = 0 # winning rounds
-        loser = 0 # losing rounds
-        for i in range(MIN_MAX_HUR):
-            winner = mc_trial(board, player)
-            if winner == player:
-                winr += 1
-            elif winner == oppo:
-                loser += 1
-        return None, (winr +1)/(winr+loser+1) # smooth
+        # ####### 1. MC as the huristic function
+        # winr = 0 # winning rounds
+        # loser = 0 # losing rounds
+        # for i in range(MIN_MAX_MC_ROUND):
+        #     winner = mc_trial(board, player)
+        #     if winner == player:
+        #         winr += 1
+        #     elif winner == oppo:
+        #         loser += 1
+        # return None, (winr +1)/(winr+loser+1) # smooth
+
+        # ####### 2. feature evaluation as huristic function
+        res = huristic(board, player)
+        # print ("res: ", res)
+        # print ("board: ", board.get_valid_moves())
+        return None, res
 
     valid_moves = board.get_valid_moves()
-    best_move, best_win_rate = None, 0
+    best_move, best_win_rate = None, -100000 # can't be 0 since heuristic is changed
+
     for move in valid_moves:
         copy = board.clone()
         copy.move(move[0], move[1], move[2], move[3], player)
@@ -172,42 +182,81 @@ def minMaxMove(board, player, d):
 
 ############### huristic function (feature function) ##########
 def huristic(board, player):
-    last_move = board._lastmove
+    # board is after the oppo moves, the board
+    # the value is for player's reference
+    box_vals = [[],[],[]]
+    for i in range(3):
+        for j in range(3):
+            box_vals[i].append( normalize( huristic_small_box(board, i, j, player)) )
+    box_row,box_col,row,col = board._lastmove
+    hc = box_vals[box_row][box_col]
+    # print ("hc: ", hc)
+    hn = box_vals[row][col]
+    H = huristic_big_box(box_vals)
+    # print (hc + hn + H)
+    return hc + hn + H
 
-def huristic_small_box(small_box, player):
+NORMAL = 30
+def huristic_small_box(board,boxrow,boxcol, player):
     # [[],[],[]] small_box
     score = 0
-    small_box = np.array(small_box)
+    small_box = np.array(board._board[boxrow][boxcol])
     oppo = provided.switch_player(player)
+
+    winner = board.check_win_box(boxrow,boxcol)
+    if winner == player: # return 1
+        return NORMAL/2
+    if winner == oppo: # return 0
+        return -NORMAL/2
     
     player_pos = (small_box == player) # 3 x 3
     oppo_pos = (small_box == oppo)
-
-    # raw version
-    # score += np.sum( (np.sum(mx,1) - np.sum(mo, 1)) * (np.sum(mx, 1) * np.sum(mo, 1) == 0) )
-    # score += np.sum((np.sum(mx, 0) - np.sum(mo, 0)) * (np.sum(mx, 0) * np.sum(mo, 0) == 0))
-    # score += (np.sum(np.diag(mx))- np.sum(np.diag(mo))) * (np.sum(np.diag(mx))* np.sum(np.diag(mo))==0)
-    # score += (np.sum(np.diag(np.fliplr(mx))) - np.sum(np.diag(np.fliplr(mo)))) * (np.sum(np.diag(np.fliplr(mx))) * np.sum(np.diag(np.fliplr(mo))) == 0)
 
     ## score the player
     score += np.sum( np.sum(player_pos,1) * (np.sum(player_pos, 1) * np.sum(oppo_pos, 1) == 0) ) # np.sum(player_pos, 1) * np.sum(oppo_pos, 1) == 0  is 3x1 true false matrix. axis=1 sum rows
     score += np.sum( np.sum(player_pos,0) * (np.sum(player_pos, 0) * np.sum(oppo_pos, 0) == 0) ) # axis 0 sum columns
     score += (      np.sum(np.diag(player_pos))     ) * (      np.sum(np.diag(player_pos)) * np.sum(np.diag(oppo_pos))==0    ) # np.diag(player_pos) is 3x1 matrix
     score += (np.sum(np.diag(np.fliplr(player_pos)))) * (    np.sum(np.diag(np.fliplr(player_pos))) * np.sum(np.diag(np.fliplr(oppo_pos))) == 0   )
-    
     return score
+
+def normalize(score):
+    return (score + 15) / NORMAL
+
+# (a^2 + b^2 + c^2)^0.5
+def huristic_big_box_2(box_vals):
+    # has a 9x9 0~1 matrix already
+    big_box = np.array(box_vals)
+    big_box = big_box ** 3
+    res = 0
+    res += np.sum( np.cbrt(np.sum(big_box, 0)) ) # 3 values
+    res += np.sum( np.cbrt(np.sum(big_box, 1)) ) # 3 values
+    res += np.sum( np.cbrt(np.diag(big_box)) ) # 1 value
+    res += np.sum( np.cbrt(np.diag(np.fliplr(big_box))) ) # 1 value
+    return res
+
+def huristic_big_box(box_vals):
+    # has a 9x9 0~1 matrix already
+    big_box = np.array(box_vals)
+    res = 0
+    res += np.sum( np.cbrt(np.prod(big_box, 0)) ) # 3 values
+    res += np.sum( np.cbrt(np.prod(big_box, 1)) ) # 3 values
+    res += np.cbrt(np.prod(np.diag(big_box))) # 1 value
+    res += np.cbrt(np.prod(np.diag(np.fliplr(big_box)))) # 1 value
+    return res
 
 
 # Test game with the console or the GUI.
-AI_VS_AI_GAMES = 3
+AI_VS_AI_GAMES = 1
 winners = []
 lookup = {provided.PLAYERX: "Monte carol", provided.PLAYERO: "minMax"}
 for _ in range(AI_VS_AI_GAMES):
     # two AI test
     if provided.play_game(mc_move, NTRIALS, minMaxMove, DEPTH, False) == provided.PLAYERX:
         winners.append("Monte carol")
-    else:
+    elif provided.play_game(mc_move, NTRIALS, minMaxMove, DEPTH, False) == provided.PLAYERO:
         winners.append("minMax")
+    else:
+        winners.append("draw")
 print (winners)
 
 # poc_ttt_gui.run_gui(3, provided.PLAYERX, mc_move, NTRIALS, False)

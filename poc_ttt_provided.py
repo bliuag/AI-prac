@@ -4,6 +4,8 @@ Provided Code for Tic-Tac-Toe
 @author Rice university, revised by Jiahan Yan and Boyu Liu
 """
 
+from time import time
+
 # Constants
 EMPTY = 1
 PLAYERX = 2
@@ -225,9 +227,21 @@ def play_game(ai_func1,ai1_para, ai_func2, ai2_para, reverse=False):
     while winner == None:
         # Move
         if curplayer == PLAYERX:
+            # prev_t = time()
             boxrow, boxcol, row, col = ai_func1(board, curplayer, ai1_para)
+            # cur_t = time()
+            # diff = cur_t - prev_t
+            # print (diff)
         else:
-            boxrow, boxcol, row, col = ai_func2(board, curplayer, ai2_para)
+            try:
+                prev_t = time()
+                boxrow, boxcol, row, col = ai_func2(board, curplayer, ai2_para)
+                cur_t = time()
+                diff = cur_t - prev_t
+                print (diff)
+            except:
+                raise ValueError
+                print("function2 error")
         board.move(boxrow, boxcol, row, col, curplayer)
 
         # Update state
