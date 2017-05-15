@@ -146,7 +146,7 @@ def random_move(board, player, para):
 
 ############################### minMax recursion #######################
 DEPTH = 3
-MIN_MAX_MC_ROUND = 10 # huristic rounds
+MIN_MAX_MC_ROUND = 20 # huristic rounds
 def minMaxRec(d, board, player):
     """
     min-max to certain degree
@@ -214,7 +214,9 @@ def huristic(board, player):
     H = huristic_big_box(box_vals)
     # print (hc, hn, H)
     # print (hc + hn + H)
-    return hc + hn + H
+    # hc = normalize(huristic_small_box(board,box_row,box_col,player))
+    # hn = normalize(huristic_small_box(board,row,col,player))
+    return H
 
 NORMAL = 30
 def huristic_small_box(board, boxrow, boxcol, player):
@@ -272,10 +274,14 @@ lookup = {provided.PLAYERX: "Monte carol", provided.PLAYERO: "minMax"}
 win1 = 0
 win2 = 0
 tie = 0
+a1_total_t = 0
+a2_total_t = 0
 for i in range(AI_VS_AI_GAMES):
     # two AI test
     print("test",i)
-    winner = provided.play_game(random_move, NTRIALS, mc_move, NTRIALS, False)
+    winner,a1_time,a2_time = provided.play_game(mc_move, NTRIALS, minMaxMove, DEPTH, False)
+    a1_total_t += a1_time
+    a2_total_t += a2_time
     if winner == provided.PLAYERX:
         win1 += 1
     elif winner == provided.PLAYERO:

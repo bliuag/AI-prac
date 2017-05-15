@@ -222,23 +222,25 @@ def play_game(ai_func1,ai1_para, ai_func2, ai2_para, reverse=False):
     board = TTTBoard(3, reverse)
     curplayer = PLAYERX
     winner = None
+    a1_time = 0
+    a2_time = 0
 
     # Run game
     while winner == None:
         # Move
         if curplayer == PLAYERX:
-            # prev_t = time()
+            prev_t = time()
             boxrow, boxcol, row, col = ai_func1(board, curplayer, ai1_para)
-            # cur_t = time()
-            # diff = cur_t - prev_t
-            # print (diff)
+            cur_t = time()
+            diff = cur_t - prev_t
+            a1_time += diff
         else:
             try:
-                # prev_t = time()
+                prev_t = time()
                 boxrow, boxcol, row, col = ai_func2(board, curplayer, ai2_para)
-                # cur_t = time()
-                # diff = cur_t - prev_t
-                # print (diff)
+                cur_t = time()
+                diff = cur_t - prev_t
+                a2_time += diff
             except:
                 raise ValueError
                 print("function2 error")
@@ -261,4 +263,4 @@ def play_game(ai_func1,ai1_para, ai_func2, ai2_para, reverse=False):
         print ("Tie!")
     else:
         print ("Error: unknown winner")
-    return winner
+    return winner,a1_time,a2_time
