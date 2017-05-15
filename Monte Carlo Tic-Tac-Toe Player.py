@@ -136,6 +136,14 @@ def mc_move(board, player, trials):
     best_move = get_best_move(board, scores)
     return best_move
 
+def random_move(board, player, para):
+    """
+    return the random move for the machine player.(boxrow, boxcol, row, column) tuple
+    """
+    valid_moves = board.get_valid_moves()
+    r_move = random.choice(valid_moves)
+    return r_move
+
 ############################### minMax recursion #######################
 DEPTH = 3
 MIN_MAX_MC_ROUND = 10 # huristic rounds
