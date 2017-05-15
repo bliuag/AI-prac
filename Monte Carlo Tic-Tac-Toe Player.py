@@ -137,7 +137,7 @@ def mc_move(board, player, trials):
     return best_move
 
 ############################### minMax recursion #######################
-DEPTH = 6
+DEPTH = 1
 MIN_MAX_MC_ROUND = 10 # huristic rounds
 def minMaxRec(d, board, player):
     """
@@ -160,8 +160,8 @@ def minMaxRec(d, board, player):
 
         # ####### 2. feature evaluation as huristic function
         res = huristic(board, player)
-        # print ("res: ", res)
-        # print ("board: ", board.get_valid_moves())
+        print ("board: ", board.get_valid_moves())
+        print ("res: ", res)
         return None, res
 
     valid_moves = board.get_valid_moves()
@@ -172,7 +172,7 @@ def minMaxRec(d, board, player):
         copy.move(move[0], move[1], move[2], move[3], player)
         player = provided.switch_player(player)
         _, r = minMaxRec(d-1, copy, player)
-        if 1-r > best_win_rate:
+        if 1-r >= best_win_rate:
             best_win_rate = 1-r
             best_move = move
     return (best_move, best_win_rate)
@@ -193,11 +193,12 @@ def huristic(board, player):
     # print ("hc: ", hc)
     hn = box_vals[row][col]
     H = huristic_big_box(box_vals)
+    # print (hc, hn, H)
     # print (hc + hn + H)
     return hc + hn + H
 
 NORMAL = 30
-def huristic_small_box(board,boxrow,boxcol, player):
+def huristic_small_box(board, boxrow, boxcol, player):
     # [[],[],[]] small_box
     score = 0
     small_box = np.array(board._board[boxrow][boxcol])
@@ -245,21 +246,21 @@ def huristic_big_box(box_vals):
     return res
 
 
-# Test game with the console or the GUI.
-AI_VS_AI_GAMES = 1
-winners = []
-lookup = {provided.PLAYERX: "Monte carol", provided.PLAYERO: "minMax"}
-for _ in range(AI_VS_AI_GAMES):
-    # two AI test
-    if provided.play_game(mc_move, NTRIALS, minMaxMove, DEPTH, False) == provided.PLAYERX:
-        winners.append("Monte carol")
-    elif provided.play_game(mc_move, NTRIALS, minMaxMove, DEPTH, False) == provided.PLAYERO:
-        winners.append("minMax")
-    else:
-        winners.append("draw")
-print (winners)
+###Test game with the console or the GUI.
+# AI_VS_AI_GAMES = 1
+# winners = []
+# lookup = {provided.PLAYERX: "Monte carol", provided.PLAYERO: "minMax"}
+# for _ in range(AI_VS_AI_GAMES):
+#     # two AI test
+#     if provided.play_game(mc_move, NTRIALS, minMaxMove, DEPTH, False) == provided.PLAYERX:
+#         winners.append("Monte carol")
+#     elif provided.play_game(mc_move, NTRIALS, minMaxMove, DEPTH, False) == provided.PLAYERO:
+#         winners.append("minMax")
+#     else:
+#         winners.append("draw")
+# print (winners)
 
 # poc_ttt_gui.run_gui(3, provided.PLAYERX, mc_move, NTRIALS, False)
 
 # just run minmax
-# poc_ttt_gui.run_gui(3, provided.PLAYERX, minMaxMove, DEPTH, False)
+poc_ttt_gui.run_gui(3, provided.PLAYERX, minMaxMove, DEPTH, False)

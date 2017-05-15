@@ -234,11 +234,11 @@ def play_game(ai_func1,ai1_para, ai_func2, ai2_para, reverse=False):
             # print (diff)
         else:
             try:
-                prev_t = time()
+                # prev_t = time()
                 boxrow, boxcol, row, col = ai_func2(board, curplayer, ai2_para)
-                cur_t = time()
-                diff = cur_t - prev_t
-                print (diff)
+                # cur_t = time()
+                # diff = cur_t - prev_t
+                # print (diff)
             except:
                 raise ValueError
                 print("function2 error")
