@@ -8,7 +8,7 @@ import poc_ttt_gui
 import poc_ttt_provided as provided
 
 ######################    Monte carol method ##############################
-NTRIALS = 100  # Number of trials to run
+NTRIALS = 50  # Number of trials to run
 SCORE_CURRENT = 3.0  # Score for squares played by the machine player
 SCORE_OTHER = 2.0  # Score for squares played by the other player
 
@@ -266,20 +266,23 @@ def huristic_big_box(box_vals):
 
 
 ###Test game with the console or the GUI.
-AI_VS_AI_GAMES = 10
+AI_VS_AI_GAMES = 20
 winners = []
 lookup = {provided.PLAYERX: "Monte carol", provided.PLAYERO: "minMax"}
+win1 = 0
+win2 = 0
+tie = 0
 for i in range(AI_VS_AI_GAMES):
     # two AI test
     print("test",i)
-    winner = provided.play_game(mc_move, NTRIALS, minMaxMove, DEPTH, False)
+    winner = provided.play_game(random_move, NTRIALS, mc_move, NTRIALS, False)
     if winner == provided.PLAYERX:
-        winners.append("Monte carol")
+        win1 += 1
     elif winner == provided.PLAYERO:
-        winners.append("minMax")
+        win2 += 1
     else:
-        winners.append("draw")
-print (winners)
+        tie += 1
+print ("%d %d %d\n" %(win1,tie,win2))
 
 # poc_ttt_gui.run_gui(3, provided.PLAYERX, mc_move, NTRIALS, False)
 
